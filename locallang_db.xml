@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'mf_mysql_profiler'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tx_mfmysqlprofiler_log">database log entries</label>
+			<label index="tx_mfmysqlprofiler_log.data_src">data source (table or Joined tables)</label>
+			<label index="tx_mfmysqlprofiler_log.query_simple">simplified query</label>
+			<label index="tx_mfmysqlprofiler_log.query_hash">query hash</label>
+			<label index="tx_mfmysqlprofiler_log.query_complete">complete query</label>
+			<label index="tx_mfmysqlprofiler_log.time">execution time</label>
+
+		</languageKey>
+	</data>
+</T3locallang>

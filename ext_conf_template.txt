@@ -1,0 +1,13 @@
+
+  # cat=basic/enable; type=boolean; label= Enable Frontend Profiling
+enableFEprofiling = 0
+
+  # cat=basic/enable; type=boolean; label= Enable Backend Profiling
+enableBEprofiling = 0
+
+  # cat=basic; type=string; label = Table Prefix Mask for Profiling, comma seperated List (empty means all)
+profilingMask = 
+
+  # cat=basic; type=string; label= Minimum Time for Profiling in milliseconds
+profilingTime = 500
+
