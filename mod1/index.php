@@ -101,9 +101,17 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 		if ( $BE_USER->user["admin"] )	{
 
 				// Draw the header.
-			$this->doc = t3lib_div::makeInstance("mediumDoc");
+			//$this->doc = t3lib_div::makeInstance("mediumDoc");
+			//$this->doc->backPath = $BACK_PATH;
+			//$this->doc->form='<form action="" method="POST">';
+			
+				// Draw the header.
+			$this->doc = t3lib_div::makeInstance("template");
 			$this->doc->backPath = $BACK_PATH;
 			$this->doc->form='<form action="" method="POST">';
+			$this->pageRenderer = $this->doc->getPageRenderer();
+
+			$this->pageRenderer->addCssFile( $BACK_PATH . t3lib_extMgm::extRelPath('mf_mysql_profiler') .  'mod1/backend.css' );
 
 				// JavaScript
 			$this->doc->JScode = '
@@ -179,9 +187,9 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 			// build headline
 		if ( $this->settings["function"] != 'manage' ){
 			$content = '';
-			$content.= $this->link_module('Overview', 'overview').'&nbsp;&gt;&nbsp;';
-			if ($this->settings['table']) $content.= $this->link_module('Table:'.$this->settings['table'] , 'source').'&nbsp;&gt;&nbsp;';
-			if ($this->settings['query']) $content.= $this->link_module('Query:'.$this->settings['query'] , 'query');
+			$content.= $this->link_module('Overview', 'overview');
+			if ($this->settings['table']) $content.= '&nbsp;&gt;&nbsp;'.$this->link_module('Table:'.$this->settings['table'] , 'source');
+			if ($this->settings['query']) $content.= '&nbsp;&gt;&nbsp;'.$this->link_module('Query:'.$this->settings['query'] , 'query');
 			$this->content.=$this->doc->section("Functions:",$content,0,1);
 		}
 		
@@ -376,11 +384,11 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 		if ( !is_array($data[0])){
 	 			 $data[0] = array($data);
 	 		}
-	 		$res .= '<table class="typo3-dblist"><tr>';
+	 		$res .= '<table class="mf_mysql_profiler_data"><tr>';
 	 			// write header
 	 		foreach (array_keys($data[0])  as $key){
 	 			if (!in_array($key, $hide_rows )){
-	 				$res .= '<td class="c-headLine"><strong>'.$key.'</strong></td>';
+	 				$res .= '<th>'.$key.'</th>';
 	 			}
 	 		}
 	 		$res .= '</tr>';
@@ -391,33 +399,19 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 			$col = 0;	
 	 			foreach ($row as $key=>$value){
 	 				if (!in_array($key, $hide_rows)){
-	 					/*
-	 					if (strlen($stripped) > 30){
-	 						$res .= '<td><span title="'.htmlentities($stripped).'" >'.substr($value,0,30).'</span></td>';
-	 					} else {
-		 					$res .= '<td><span title="'.htmlentities($stripped).'" >'.$value.'</span></td>';
-	 					}*/
 	 					
 	 					// calc style
 	 					if ($line%2){
-	 						if ($col%2){
-	 							$style = 'background-color:#FFFFFF;';
-	 						} else {
-	 							$style = 'background-color:#FAFAFA;';
-	 						}	
+ 							$class = 'odd';
 	 					} else {
-	  						if ($col%2){
-	  							$style = 'background-color:#EEEEEE;';
-	 						} else {
-	 							$style = 'background-color:#EAEAEA;';
-	 						}	
+ 							$class = 'even';
 	 					}
 	 						// write row
 	 					$stripped = strip_tags($value);	
 	 					if (strpos($value,'</a>') === false){
 	 						$value = substr(strip_tags($value),0,150);
 	 					}
-	 					$res .= '<td style="'.$style.'" ><span title="'.htmlentities($stripped).'" >'.$value.'</span></td>';	 				
+	 					$res .= '<td class="'.$class.'" ><span title="'.htmlentities($stripped).'" >'.$value.'</span></td>';	 				
 	 				}
 	 				$col ++;
 	 			}

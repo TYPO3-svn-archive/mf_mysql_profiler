@@ -28,10 +28,12 @@ $EM_CONF[$_EXTKEY] = array(
 	'modify_tables' => '',
 	'clearCacheOnLoad' => 0,
 	'lockType' => '',
+	'TYPO3_version' => '4.5.0-4.9.99',
 	'author_company' => '',
 	'version' => '0.0.2',
 	'constraints' => array(
 		'depends' => array(
+			'typo3' => '4.5.0-4.9.99',
 		),
 		'conflicts' => array(
 			'dbal'

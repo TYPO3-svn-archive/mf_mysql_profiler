@@ -1,0 +1,42 @@
+/* 
+    Document   : backend
+    Created on : 15.11.2011, 17:27:42
+    Author     : martin
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+body{
+	padding:20px;
+}
+
+table.mf_mysql_profiler_data {
+	border-collapse: collapse;
+}
+
+table.mf_mysql_profiler_data tr th {
+	font-weight: bold;
+	background-color: #5B5B5B;
+	color: white;
+	border: 1px solid #5B5B5B;
+	padding: 3px;
+}
+
+table.mf_mysql_profiler_data tr td {
+	color: black;
+	padding: 3px;
+	border: 1px solid #5B5B5B;
+}
+
+table.mf_mysql_profiler_data tr td.odd {
+	background-color: #FFFFFF;
+}
+
+table.mf_mysql_profiler_data tr td.even {
+	background-color: #EEEEEE;
+}
