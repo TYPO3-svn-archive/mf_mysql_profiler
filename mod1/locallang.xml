@@ -11,6 +11,7 @@
 			<label index="source">Table Queries</label>
 			<label index="query">Single Query</label>
 			<label index="manage">Manage Settings</label>
+			<label index="clear">Clear Log</label>
 		</languageKey>
 	</data>
 </T3locallang>

@@ -78,6 +78,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 				"source"   => $LANG->getLL("source"),
 				"query"    => $LANG->getLL("query"),
 				"manage"   => $LANG->getLL("manage"),
+				"clear"    => $LANG->getLL("clear")
 			)
 		);
 		parent::menuConfig();
@@ -239,9 +240,31 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 					$this->content.=$this->doc->section("Message #3:",$content,0,1);
 				}
 			break;
+			
+			case "clear":
+				
+				$content = '<a href="index.php?&SET[function]=clear&SET[exec]=clear" >Clear</a>';
+				$this->content.=$this->doc->section("Clear Log-Items:",$content,0,1);
+				
+				if ( $this->settings['exec'] == "clear"){
+					$res = $this->clearQueryLog();
+					$this->content.=$this->doc->section("Result:",$res,0,1);
+				}
+				
+				break;
 		}
 	}
 	
+	function clearQueryLog(){
+		$content = 'Empty table tx_mfmysqlprofiler_log: ';
+		$success = $GLOBALS['TYPO3_DB']->sql_query('TRUNCATE TABLE `tx_mfmysqlprofiler_log`;');
+		if ($success) {
+			$content.= 'Success!';
+		} else {
+			$content.= 'FAIL!!!';
+		}
+		return $content;
+	}
 	
 	/*
 	 * 
@@ -250,7 +273,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 function get_source_info (){
 		 
 	 		// get list of sources
-		$res = $GLOBALS['TYPO3_DB']->sql_query('SHOW TABLES;');
+		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT data_src FROM `tx_mfmysqlprofiler_log` GROUP by data_src');
 		$tables = array();
 		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_row($res) ){
 			$tables[] = $row[0];
