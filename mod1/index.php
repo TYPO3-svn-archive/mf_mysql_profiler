@@ -204,7 +204,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 						// list indices
 					$data = $this->get_index_info($this->settings['table']);
 					$content =  $this->print_data($data);
-					$this->content.=$this->doc->section("Indices:",$content,0,1);
+					$this->content.=$this->doc->section('Indices for ' . $this->settings['table'] . ':',$content,0,1);
 				} else {
 					$content .= 'you have to select a table';
 					$this->content.=$this->doc->section("Message #2:",$content,0,1);
@@ -214,26 +214,26 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 			case "query":
 				if ($this->settings['query']){
 						// query stats
-					$data = $this->get_query_info($this->settings['query']);
-					if ($data){
+					$queryData = $this->get_query_info($this->settings['query']);
+					if ($queryData){
 						
 							// query
-						$this->content.=$this->doc->section("Simple Query:",$data['query_simple'],0,1);
-						$this->content.=$this->doc->section("Query:",$data['query_complete'],0,1);
+						$this->content.=$this->doc->section("Simple Query:",$queryData['query_simple'],0,1);
+						$this->content.=$this->doc->section("Query:",$queryData['query_complete'],0,1);
 						
 							// query stats
-						$content =  $this->print_data(array($data),array('query_simple','query_complete'));
+						$content = $this->print_data(array($queryData),array('query_simple','query_complete'));
 						$this->content.=$this->doc->section("Query Stats:",$content,0,1);
 						
 							// explain
-						$data = $this->get_query_explain($data['query_complete']);
-						$content =  $this->print_data(array($data));
+						$dataExplain = $this->get_query_explain($queryData['query_simple']);
+						$content = $this->print_data($dataExplain);
 						$this->content.=$this->doc->section("Explain Query:",$content,0,1);
 						
 							// list indices
-						$data = $this->get_index_info($this->settings['table']);
-						$content =  $this->print_data($data);
-						$this->content.=$this->doc->section("Indices of Table '.$this->settings['table'].':",$content,0,1);	
+						$dataIndices = $this->get_index_info($queryData['data_src']);
+						$content = $this->print_data($dataIndices);
+						$this->content.=$this->doc->section('Indices for '.$queryData['data_src'].':',$content,0,1);	
 					}	
 				} else {
 					$content="you have to select table and query";
@@ -340,23 +340,33 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 
 	 	// list all indices of a given query
 	 function get_index_info ($table){
-	 	$res  = $GLOBALS['TYPO3_DB']->sql_query('SHOW INDEX FROM `'.$table.'`');
-	 	$indices = array();
-	 	while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
-			$indices[] = $row;
+		$tables = explode(',',$table);
+		$indices = array();
+		
+		foreach ($tables as $singleTable){
+			$tableParts = explode (' ', trim($singleTable));
+			$tableName = $tableParts[0];
+			$res  = $GLOBALS['TYPO3_DB']->sql_query('SHOW INDEX FROM `'.$tableName.'`');
+			while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
+				$indices[] = $row;
+			}
 		}
+		
 		return $indices;
 	 }
 	 
 	 function get_query_info ($query) {
-	 	$res  = $GLOBALS['TYPO3_DB']->exec_SELECTquery('COUNT(*) AS num_querys, AVG(time) as avg_time, MIN(time) AS min_time, MAX(time) AS max_time, SUM(time) as time_sum, query_simple, query_complete ' ,'tx_mfmysqlprofiler_log', 'query_hash = \''.$query.'\'' ,'query_hash');
+	 	$res  = $GLOBALS['TYPO3_DB']->exec_SELECTquery('COUNT(*) AS num_querys, AVG(time) as avg_time, MIN(time) AS min_time, MAX(time) AS max_time, SUM(time) as time_sum, data_src, query_simple, query_complete ' ,'tx_mfmysqlprofiler_log', 'query_hash = \''.$query.'\'' ,'query_hash');
 	 	$info = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
 	 	return $info;
 	 }
 	 
 	 function get_query_explain ($query) {
   		$res  = $GLOBALS['TYPO3_DB']->sql_query('EXPLAIN '.$query );
-  		$info = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+		$info = array();
+		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
+			$info[]=$row;
+		};
   		return $info;
 	 }
 	 
