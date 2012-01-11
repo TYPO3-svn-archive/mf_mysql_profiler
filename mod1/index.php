@@ -41,7 +41,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	var $pageinfo;
 	var $settings;
 	var $profilingMask;
-	
+
 	/**
 	 * Initializes the Module
 	 * @return	void
@@ -51,7 +51,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 
 		parent::init();
 		$this->settings = t3lib_div::_GP('SET');
-		
+
 		$conf = unserialize( $GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['mf_mysql_profiler']);
 
 			// load profiling mask
@@ -104,7 +104,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 			//$this->doc = t3lib_div::makeInstance("mediumDoc");
 			//$this->doc->backPath = $BACK_PATH;
 			//$this->doc->form='<form action="" method="POST">';
-			
+
 				// Draw the header.
 			$this->doc = t3lib_div::makeInstance("template");
 			$this->doc->backPath = $BACK_PATH;
@@ -139,7 +139,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 
 
 			// Render content:
-			
+
 			$this->moduleContent();
 
 
@@ -179,7 +179,7 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 * @return	void
 	 */
 	function moduleContent()	{
-		
+
 			// enable default if needed
 		if (!$this->settings['table'] and in_array( $this->settings["function"],array('source','query') ) ){
 			$this->settings["function"] ='overview';
@@ -192,23 +192,23 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 			if ($this->settings['query']) $content.= '&nbsp;&gt;&nbsp;'.$this->link_module('Query:'.$this->settings['query'] , 'query');
 			$this->content.=$this->doc->section("Functions:",$content,0,1);
 		}
-		
+
 		switch( $this->settings["function"] ) {
 			default:
 			case "overview":
 					// list table infos
 				$data = $this->get_source_info();
 				$content = $this->print_data($data);
-					
+
 				$this->content.=$this->doc->section("Tables:",$content,0,1);
 			break;
-			
+
 			case "source":
 				if ($this->settings['table']){
 						// list querys and stats
 					$data = $this->get_table_info($this->settings['table']);
 					$content =  $this->print_data($data);
-					$this->content.=$this->doc->section("Querys:",$content,0,1);	
+					$this->content.=$this->doc->section("Querys:",$content,0,1);
 						// list indices
 					$data = $this->get_index_info($this->settings['table']);
 					$content =  $this->print_data($data);
@@ -218,51 +218,51 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 					$this->content.=$this->doc->section("Message #2:",$content,0,1);
 				}
 			break;
-			
+
 			case "query":
 				if ($this->settings['query']){
 						// query stats
 					$queryData = $this->get_query_info($this->settings['query']);
 					if ($queryData){
-						
+
 							// query
 						$this->content.=$this->doc->section("Simple Query:",$queryData['query_simple'],0,1);
 						$this->content.=$this->doc->section("Query:",$queryData['query_complete'],0,1);
-						
+
 							// query stats
 						$content = $this->print_data(array($queryData),array('query_simple','query_complete'));
 						$this->content.=$this->doc->section("Query Stats:",$content,0,1);
-						
+
 							// explain
-						$dataExplain = $this->get_query_explain($queryData['query_simple']);
+						$dataExplain = $this->get_query_explain($queryData);
 						$content = $this->print_data($dataExplain);
 						$this->content.=$this->doc->section("Explain Query:",$content,0,1);
-						
+
 							// list indices
 						$dataIndices = $this->get_index_info($queryData['data_src']);
 						$content = $this->print_data($dataIndices);
-						$this->content.=$this->doc->section('Indices for '.$queryData['data_src'].':',$content,0,1);	
-					}	
+						$this->content.=$this->doc->section('Indices for '.$queryData['data_src'].':',$content,0,1);
+					}
 				} else {
 					$content="you have to select table and query";
 					$this->content.=$this->doc->section("Message #3:",$content,0,1);
 				}
 			break;
-			
+
 			case "clear":
-				
+
 				$content = '<a href="index.php?&SET[function]=clear&SET[exec]=clear" >Clear</a>';
 				$this->content.=$this->doc->section("Clear Log-Items:",$content,0,1);
-				
+
 				if ( $this->settings['exec'] == "clear"){
 					$res = $this->clearQueryLog();
 					$this->content.=$this->doc->section("Result:",$res,0,1);
 				}
-				
+
 				break;
 		}
 	}
-	
+
 	function clearQueryLog(){
 		$content = 'Empty table tx_mfmysqlprofiler_log: ';
 		$success = $GLOBALS['TYPO3_DB']->sql_query('TRUNCATE TABLE `tx_mfmysqlprofiler_log`;');
@@ -273,13 +273,13 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 		}
 		return $content;
 	}
-	
+
 	/*
-	 * 
+	 *
 	 */
-	 
+
 	 function get_source_info (){
-		 
+
 	 		// get list of sources
 		$res = $GLOBALS['TYPO3_DB']->sql_query('SELECT data_src FROM `tx_mfmysqlprofiler_log` GROUP by data_src');
 		$tables = array();
@@ -330,27 +330,27 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 		}
 		return $data;
 	 }
-	 
-		// where | query | num_calls | avg_time | min_time | max_time | combined_time | show details 
+
+		// where | query | num_calls | avg_time | min_time | max_time | combined_time | show details
 	 function get_table_info ($table){
 	 	$res  = $GLOBALS['TYPO3_DB']->exec_SELECTquery('COUNT(*) AS num_querys, AVG(time) as avg_time, MIN(time) AS min_time, MAX(time) AS max_time, SUM(time) as time_sum, query_simple, query_hash' ,'tx_mfmysqlprofiler_log', 'data_src = "'.$table.'"' ,'query_hash');
 	 	$querys = array();
 	 	while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
-			
+
 			 	// add link
 			 $row['link'] = '<a href="index.php?&SET[function]=query&SET[table]='.$table.'&SET[query]='.$row['query_hash'].'" >details</a>';
 			 unset ($row['query_hash']);
-			 
+
 			 $querys[] = $row;
 		}
 		return $querys;
 	 }
-	 
+
 	 	// list all indices of a given query
 	 function get_index_info ($table){
 		$tables = explode(',',$table);
 		$indices = array();
-		
+
 		foreach ($tables as $singleTable){
 			$tableParts = explode (' ', trim($singleTable));
 			$tableName = $tableParts[0];
@@ -359,25 +359,27 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 				$indices[] = $row;
 			}
 		}
-		
+
 		return $indices;
 	 }
-	 
+
 	 function get_query_info ($query) {
 	 	$res  = $GLOBALS['TYPO3_DB']->exec_SELECTquery('COUNT(*) AS num_querys, AVG(time) as avg_time, MIN(time) AS min_time, MAX(time) AS max_time, SUM(time) as time_sum, data_src, query_simple, query_complete ' ,'tx_mfmysqlprofiler_log', 'query_hash = \''.$query.'\'' ,'query_hash');
 	 	$info = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
 	 	return $info;
 	 }
-	 
-	 function get_query_explain ($query) {
-  		$res  = $GLOBALS['TYPO3_DB']->sql_query('EXPLAIN '.$query );
+
+	 function get_query_explain ($queryRecord) {
 		$info = array();
-		while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
-			$info[]=$row;
-		};
+		if ($queryRecord['query_complete']){
+			$res  = $GLOBALS['TYPO3_DB']->sql_query('EXPLAIN ' . $queryRecord['query_complete'] );
+			while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res) ){
+				$info[]=$row;
+			};
+		}
   		return $info;
 	 }
-	 
+
 	 function print_data ($data, $hide_rows = array() ){
 	 	$res = '';
 	 	if (is_array($data)) {
@@ -393,13 +395,13 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 		}
 	 		$res .= '</tr>';
 	 			// write content
-	 		$line = 0;	
+	 		$line = 0;
 	 		foreach ($data as $row){
 	 			$res .= '<tr>';
-	 			$col = 0;	
+	 			$col = 0;
 	 			foreach ($row as $key=>$value){
 	 				if (!in_array($key, $hide_rows)){
-	 					
+
 	 					// calc style
 	 					if ($line%2){
  							$class = 'odd';
@@ -407,28 +409,28 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
  							$class = 'even';
 	 					}
 	 						// write row
-	 					$stripped = strip_tags($value);	
+	 					$stripped = strip_tags($value);
 	 					if (strpos($value,'</a>') === false){
 	 						$value = substr(strip_tags($value),0,150);
 	 					}
-	 					$res .= '<td class="'.$class.'" ><span title="'.htmlentities($stripped).'" >'.$value.'</span></td>';	 				
+	 					$res .= '<td class="'.$class.'" ><span title="'.htmlentities($stripped).'" >'.$value.'</span></td>';
 	 				}
 	 				$col ++;
 	 			}
-				$res .= '<tr>';	
+				$res .= '<tr>';
 				$line ++;
 	 		}
 	 		$res .= '</table>';
 	 	}
 	 	return $res;
 	 }
-	 	 
+
 	 function print_info(){
-	 	
+
 	 }
-	 
+
 	 function link_module($text, $module , $settings=false){
-	 		// fallback to predefined vars 
+	 		// fallback to predefined vars
 	 	if (!$settings) {
 	 		$settings = $this->settings;
 	 	}
@@ -441,8 +443,8 @@ class tx_mfmysqlprofiler_module1 extends t3lib_SCbase {
 	 	}
 	 		// build result
 	 	$result = '<a href="index.php?'.implode('&',$params).'">'.$text.'</a>';
-	  
-		return $result;	
+
+		return $result;
 	 }
 }
 
