@@ -27,7 +27,7 @@
 
 
 class ux_t3lib_DB extends t3lib_DB {
-	
+
 	var $ux_t3lib_DB_profiling_time = 0;
 	var $ux_t3lib_DB_profiling_mask = false;
 	var $last_insert_id;
@@ -55,7 +55,7 @@ class ux_t3lib_DB extends t3lib_DB {
 		$this->ux_t3lib_DB_profile($table, $query, $ts );
 		return $res;
 	}
- 
+
 	function exec_DELETEquery($table,$where)        {
 		$ts = microtime();
 		$query = $this->DELETEquery($table,$where);
@@ -83,17 +83,20 @@ class ux_t3lib_DB extends t3lib_DB {
 		if ($this->debugOutput) $this->debug('exec_SELECTquery');
 		return $res;
 	}
-	
+
 	function ux_t3lib_DB_simplify ($src){
-		
-			// define patterns
-		$str_pattern = "/(?<!\\\\)'([^'\\\\]*(\\\\.[^'\\\\]*)*)'/";
-		$num_pattern = "/(?<=[=<>\\s\\(]{1})[0-9.]+(?=([\\s\\)]{1}|\\Z))/";
-		 
+
 			// replace all string sources with predefined string
-		$src = preg_replace( $str_pattern , "'string'" , $src);
-			// replace all numbers 
+		$str_pattern_1 = "/(?<!\\\\)'([^'\\\\]*(\\\\.[^'\\\\]*)*)'/";
+		$str_pattern_2 = '/(?<!\\\\)"([^"\\\\]*(\\\\.[^"\\\\]*)*)"/';
+
+		$src = preg_replace( $str_pattern_1 , "'string'" , $src);
+		$src = preg_replace( $str_pattern_2 , '"string"' , $src);
+
+			// replace all numbers
+		$num_pattern = "/(?<=[=<>\\,\\s\\(]{1})[0-9.]+(?=([;=<>\\,\\s\\)]{1}|\\Z))/";
 		$src = preg_replace( $num_pattern , "123" , $src);
+
 		return $src;
 	}
 
@@ -103,7 +106,7 @@ class ux_t3lib_DB extends t3lib_DB {
 
 	function ux_t3lib_DB_profile ($table, $query, $time){
 
-			// check profiling mask	
+			// check profiling mask
 		if ( $this->ux_t3lib_DB_profiling_mask && count( $this->ux_t3lib_DB_profiling_mask  ) > 0 ){
 			$enable_profiling = false;
 			foreach($this->ux_t3lib_DB_profiling_mask as $tableMaskName){
@@ -116,17 +119,17 @@ class ux_t3lib_DB extends t3lib_DB {
 		}
 
 		if (!$enable_profiling) return;
-		
-			// check profiling time			
-		$query_time = microtime() - $time;	
+
+			// check profiling time
+		$query_time = microtime() - $time;
 		if ($this->ux_t3lib_DB_profiling_time >= $query_time) return;
 
-		
-		
+
+
 			// simplify src and query for analysis
 		$simple_table = $this->ux_t3lib_DB_simplify($table);
 		$simple_query = $this->ux_t3lib_DB_simplify($query);
-	
+
 			// save log record without profiling
 		parent::exec_INSERTquery(
 			'tx_mfmysqlprofiler_log',
